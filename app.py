@@ -71,3 +71,111 @@ def create_sales_data() -> pd.DataFrame:
     return pd.DataFrame(sales_rows)
 
 
+
+
+def analyze_sales_data(sales: pd.DataFrame) -> dict:
+    """Analyzes sales data, generates charts, and calculates key metrics."""
+    sales["month"] = sales["date"].dt.to_period("M").astype(str)
+    sales["profit_margin"] = sales["profit"] / sales["revenue"]
+
+    total_revenue = sales["revenue"].sum()
+    total_profit = sales["profit"].sum()
+    total_orders = sales["transaction_id"].nunique()
+    average_order_value = total_revenue / total_orders
+    profit_margin = total_profit / total_revenue
+
+    monthly_sales = (
+        sales.groupby("month", as_index=False)
+        .agg(monthly_revenue=("revenue", "sum"), 
+             monthly_profit=("profit", "sum"), 
+             monthly_quantity=("quantity", "sum"))
+        )
+    
+    category_sales = (
+        sales.groupby("category", as_index=False)
+        .agg(category_revenue=("revenue", "sum"), 
+             category_profit=("profit", "sum"), 
+             category_quantity=("quantity", "sum"))
+        .sort_values("category_revenue", ascending=False)
+        )
+    
+    product_sales = (
+        sales.groupby("product", as_index=False)
+        .agg(product_revenue=("revenue", "sum"), 
+             product_quantity=("quantity", "sum"), 
+             product_profit=("profit", "sum"))
+        .sort_values("product_revenue", ascending=False)
+        )
+    
+    city_sales = (
+        sales.groupby("city", as_index=False)
+        .agg(city_revenue=("revenue", "sum"), 
+             city_profit=("profit", "sum"))
+             .sort_values("city_revenue", ascending=False)
+    )
+    
+    channel_sales = (
+        sales.groupby("channel", as_index=False)
+        .agg(channel_revenue=("revenue", "sum"), channel_profit=("profit", "sum"))
+        .sort_values("channel_revenue", ascending=False)
+    )
+
+    # Chart 1: monthly revenue and profit
+    fig, ax = plt.subplots(figsize=(12, 5))
+    ax.plot(monthly_sales["month"], monthly_sales["monthly_revenue"], marker="o", color="blue", label="Revenue")
+    ax.plot(monthly_sales["month"], monthly_sales["monthly_profit"], marker="o", color="red", label="Profit")
+    ax.set_xlabel("Month")
+    ax.set_ylabel("ETB")
+    ax.set_title("BiniMart: Monthly Revenue and Profit")
+    ax.tick_params(axis="x", rotation=45)
+    ax.legend()
+    ax.grid(axis="y", alpha=0.25)
+    save_chart(fig, "01_monthly_performance.png")
+
+    # Chart 2: revenue and profit by category
+    fig, ax = plt.subplots(figsize=(10, 5))
+    x = np.arange(len(category_sales))
+    bar_width = 0.4
+    ax.bar(x - bar_width / 2, category_sales["category_revenue"], width=bar_width, label="Revenue", color="blue")
+    ax.bar(x + bar_width / 2, category_sales["category_profit"], width=bar_width, label="Profit", color="orange")
+    ax.set_xticks(x)
+    ax.set_xticklabels(category_sales["category"])
+    ax.set_xlabel("Product category")
+    ax.set_ylabel("ETB")
+    ax.set_title("BiniMart: Revenue and Profit by Product Category")
+    ax.legend()
+    ax.grid(axis="y", alpha=0.25)
+    save_chart(fig, "02_category_performance.png")
+
+    # Chart 3: top products
+    top_products = product_sales.head(8)
+    fig, ax = plt.subplots(figsize=(10, 5))
+    ax.barh(top_products["product"], top_products["product_revenue"], color="yellowgreen")
+    ax.set_xlabel("Revenue (ETB)")
+    ax.set_title("BiniMart: Top 8 products by revenue")
+    ax.grid(axis="x", alpha=0.25)
+    save_chart(fig, "03_top_products.png")
+
+    # Chart 4: city and sales channel share
+    fig, axes = plt.subplots(1, 2, figsize=(11, 5))
+    axes[0].pie(city_sales["city_revenue"], labels=city_sales["city"], autopct="%1.1f%%")
+    axes[0].set_title("BiniMart: Revenue share by city")
+    axes[1].bar(channel_sales["channel"], channel_sales["channel_revenue"], color=["blue", "orange"])
+    axes[1].set_title("BiniMart: Revenue by sales channel")
+    axes[1].set_ylabel("Revenue (ETB)")
+    axes[1].grid(axis="y", alpha=0.25)
+    save_chart(fig, "04_city_and_channel.png")
+
+    # Package metrics to pass to the report generator
+    return {
+        "total_revenue": total_revenue,
+        "total_profit": total_profit,
+        "profit_margin": profit_margin,
+        "total_orders": total_orders,
+        "average_order_value": average_order_value,
+        "best_category": category_sales.iloc[0],
+        "best_product": product_sales.iloc[0],
+        "best_city": city_sales.iloc[0],
+        "online_share": channel_sales.loc[channel_sales["channel"] == "Online", "channel_revenue"].iloc[0] / total_revenue,
+        "best_month": monthly_sales.loc[monthly_sales["monthly_revenue"].idxmax()]
+    }
