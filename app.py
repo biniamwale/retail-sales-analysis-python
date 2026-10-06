@@ -186,3 +186,59 @@ def save_chart(fig, name: str) -> None:
     fig.tight_layout()
     fig.savefig(OUTPUT_DIR / name, dpi=180, bbox_inches="tight")
     plt.close(fig)
+
+
+
+
+def generate_sales_report(metrics: dict) -> str:
+    """Consumes the metrics dictionary to generate a Markdown report."""
+    
+    # Unpack metrics for cleaner f-string formatting
+    total_revenue = metrics["total_revenue"]
+    total_profit = metrics["total_profit"]
+    profit_margin = metrics["profit_margin"]
+    total_orders = metrics["total_orders"]
+    average_order_value = metrics["average_order_value"]
+    best_product = metrics["best_product"]
+    best_category = metrics["best_category"]
+    best_city = metrics["best_city"]
+    best_month = metrics["best_month"]
+    online_share = metrics["online_share"]
+
+    report = f"""# BiniMart Sales Summary (2025)
+
+**Period:** Jan 1, 2025 – Dec 31, 2025  
+*(Internal Learning Project Data)*
+
+---
+
+### The Big Numbers
+
+| What We Measured | Result |
+|:---|---:|
+| Total Sales (Revenue) | ETB {total_revenue:,.2f} |
+| Total Profit | ETB {total_profit:,.2f} |
+| Profit Margin | {profit_margin:.1%} |
+| Total Orders Placed | {total_orders:,} |
+| Average Spent per Order | ETB {average_order_value:,.2f} |
+
+---
+
+### What Worked Best
+
+* **Top Product:** **{best_product['product']}** made **ETB {best_product['product_revenue']:,.2f}** ({int(best_product['product_quantity']):,} units sold).
+* **Top Category:** **{best_category['category']}** brought in **ETB {best_category['category_revenue']:,.2f}**.
+* **Top City:** Customers in **{best_city['city']}** bought the most (**ETB {best_city['city_revenue']:,.2f}**).
+* **Best Month:** **{best_month['month']}** was your busiest month (**ETB {best_month['monthly_revenue']:,.2f}**).
+* **Online Sales:** **{online_share:.1%}** of your total sales came from online orders.
+
+---
+
+### Next Steps to Make More Money
+
+1. **Never run out of {best_product['product']}:** It is your biggest seller. Always reorder before stock gets low.
+2. **Prepare early for {best_month['month']}:** Stock up and prepare deliveries before this rush hits so you do not miss sales.
+3. **Double down online:** Since **{online_share:.1%}** of your revenue comes from the website, try offering product packages (bundles) to get buyers to spend more per checkout.
+4. **Check profits before dropping slow products:** Even if an item sells less, it might have a high profit margin. Don't cut items until you verify their actual profit.
+"""
+    return report
