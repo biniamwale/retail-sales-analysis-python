@@ -179,3 +179,10 @@ def analyze_sales_data(sales: pd.DataFrame) -> dict:
         "online_share": channel_sales.loc[channel_sales["channel"] == "Online", "channel_revenue"].iloc[0] / total_revenue,
         "best_month": monthly_sales.loc[monthly_sales["monthly_revenue"].idxmax()]
     }
+
+
+
+def save_chart(fig, name: str) -> None:
+    fig.tight_layout()
+    fig.savefig(OUTPUT_DIR / name, dpi=180, bbox_inches="tight")
+    plt.close(fig)
