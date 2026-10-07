@@ -242,3 +242,17 @@ def generate_sales_report(metrics: dict) -> str:
 4. **Check profits before dropping slow products:** Even if an item sells less, it might have a high profit margin. Don't cut items until you verify their actual profit.
 """
     return report
+
+
+
+# Main function to run the analysis and save results.
+def main() -> None:
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
+    sales = create_sales_data()
+    sales.to_csv(DATA_PATH, index=False)
+    metrics = analyze_sales_data(sales)
+    report = generate_sales_report(metrics)
+    (OUTPUT_DIR / "business_report.md").write_text(report, encoding="utf-8")
+    print("Analysis complete.")
+    print(f"Dataset: {DATA_PATH}")
+    print(f"Charts and report: {OUTPUT_DIR}")
