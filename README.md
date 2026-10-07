@@ -73,5 +73,5 @@ To run this data pipeline locally and generate the reports and charts:
    pip install pandas matplotlib numpy pathlib
 3. **Execute the pipeline:**
     ```bash
-    python sales_analysis.py
+    python app.py
 
