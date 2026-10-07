@@ -256,3 +256,10 @@ def main() -> None:
     print("Analysis complete.")
     print(f"Dataset: {DATA_PATH}")
     print(f"Charts and report: {OUTPUT_DIR}")
+
+
+
+#__name__ == "__main__" during execution of any python program, so the main function get executed.
+if __name__ == "__main__":
+    main()
+
