@@ -74,4 +74,3 @@ To run this data pipeline locally and generate the reports and charts:
 3. **Execute the pipeline:**
     ```bash
     python app.py
-
